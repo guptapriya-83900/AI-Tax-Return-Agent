@@ -1,6 +1,7 @@
 from flask import Flask, render_template, request, redirect, url_for, send_from_directory
 import os
 from werkzeug.utils import secure_filename
+from modules.extractor import extract_data_from_pdf
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -37,7 +38,22 @@ def upload_file():
             file.save(filepath)
             saved_files.append(filename)
 
-    return render_template('result.html', files=saved_files, info=personal_info)
+    parsed_results = []
+    for filename in saved_files:
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        parsed = extract_data_from_pdf(filepath)
+        parsed['filename'] = filename
+        parsed_results.append(parsed)
+          # 👇 DEBUG: See what text was extracted
+        print("======== RAW TEXT FROM FILE ========")
+        print(f"File: {filename}")
+        print(parsed.get('raw_text', 'No text found'))
+
+
+# Pass to template
+    return render_template('result.html', files=saved_files, info=personal_info, parsed_data=parsed_results)
+
+    #return render_template('result.html', files=saved_files, info=personal_info)
 
 # Optional route to view uploaded file (for testing)
 @app.route('/uploads/<filename>')

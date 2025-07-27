@@ -15,5 +15,18 @@
     <p>Name: {{ info.name }}</p>
     <p>Filing Status: {{ info.filing_status }}</p>
     <p>Dependents: {{ info.dependents }}</p>
+
+    <h3>Extracted Data:</h3>
+{% for data in parsed_data %}
+    <h5>{{ data.filename }} ({{ data.type }})</h5>
+    <ul>
+        {% for key, value in data.items() %}
+            {% if key not in ['filename', 'raw_text'] %}
+                <li><strong>{{ key }}:</strong> {{ value }}</li>
+            {% endif %}
+        {% endfor %}
+    </ul>
+{% endfor %}
+
 </body>
 </html>
