@@ -1,47 +1,86 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Upload Result</title>
+    <title>Tax Summary - AI Tax Agent</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <style>
+        body {
+            background-color: #f1f5fe;
+        }
+        .container {
+            max-width: 800px;
+        }
+        h2 {
+            color: #0d6efd;
+        }
+        .section {
+            background: white;
+            padding: 20px;
+            border-radius: 12px;
+            margin-bottom: 24px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.03);
+        }
+        .btn-outline {
+            border: 1px solid #0d6efd;
+            color: #0d6efd;
+        }
+        .btn-outline:hover {
+            background-color: #0d6efd;
+            color: white;
+        }
+    </style>
 </head>
-<body class="container py-5">
-    <h2>Uploaded Files</h2>
-    <ul>
-        {% for file in files %}
-            <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
-        {% endfor %}
-    </ul>
+<body>
+    <div class="container py-5">
+        <div class="section">
+            <h2 class="mb-3"><i class="bi bi-person-badge"></i> Personal Info</h2>
+            <p><strong>Name:</strong> {{ info.name }}</p>
+            <p><strong>Filing Status:</strong> {{ info.filing_status }}</p>
+            <p><strong>Dependents:</strong> {{ info.dependents }}</p>
+        </div>
 
-    <h3>Personal Info:</h3>
-    <p>Name: {{ info.name }}</p>
-    <p>Filing Status: {{ info.filing_status }}</p>
-    <p>Dependents: {{ info.dependents }}</p>
+        <div class="section">
+            <h2><i class="bi bi-file-earmark-check"></i> Uploaded Files</h2>
+            <ul>
+                {% for file in files %}
+                    <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
+                {% endfor %}
+            </ul>
+        </div>
 
-    <h3>Extracted Data:</h3>
-    {% for data in parsed_data %}
-        <h5>{{ data.filename }} ({{ data.type }})</h5>
-        <ul>
-            {% for key, value in data.items() %}
-                {% if key not in ['filename', 'raw_text'] %}
-                    <li><strong>{{ key }}:</strong> {{ value }}</li>
-                {% endif %}
+        <div class="section">
+            <h2><i class="bi bi-search"></i> Extracted Data</h2>
+            {% for data in parsed_data %}
+                <h5>{{ data.filename }} ({{ data.type }})</h5>
+                <ul>
+                    {% for key, value in data.items() %}
+                        {% if key not in ['filename', 'raw_text'] %}
+                            <li><strong>{{ key }}:</strong> {{ value }}</li>
+                        {% endif %}
+                    {% endfor %}
+                </ul>
             {% endfor %}
-        </ul>
-    {% endfor %}
+        </div>
 
-    <h3>Tax Summary:</h3>
-    <ul>
-        <li><strong>Total Income:</strong> ${{ tax_summary.total_income }}</li>
-        <li><strong>Standard Deduction:</strong> ${{ tax_summary.standard_deduction }}</li>
-        <li><strong>Taxable Income:</strong> ${{ tax_summary.taxable_income }}</li>
-        <li><strong>Tax Due:</strong> ${{ tax_summary.tax_due }}</li>
-        <li><strong>Total Withheld:</strong> ${{ tax_summary.withheld }}</li>
-        <li><strong>Refund or Amount Owed:</strong> ${{ tax_summary.refund_or_owe }}</li>
-    </ul>
+        <div class="section">
+            <h2><i class="bi bi-calculator"></i> Tax Summary</h2>
+            <ul>
+                <li><strong>Total Income:</strong> ${{ tax_summary.total_income }}</li>
+                <li><strong>Standard Deduction:</strong> ${{ tax_summary.standard_deduction }}</li>
+                <li><strong>Taxable Income:</strong> ${{ tax_summary.taxable_income }}</li>
+                <li><strong>Tax Due:</strong> ${{ tax_summary.tax_due }}</li>
+                <li><strong>Total Withheld:</strong> ${{ tax_summary.withheld }}</li>
+                <li><strong>Refund or Amount Owed:</strong> ${{ tax_summary.refund_or_owe }}</li>
+            </ul>
+        </div>
 
-    <h3>Download Completed Form 1040:</h3>
-    <a href="{{ url_for('download_pdf', filename=pdf_filename) }}" class="btn btn-success">Download Form 1040 PDF</a>
-
-
-
+        <div class="section text-center">
+            <h4 class="mb-3"><i class="bi bi-download"></i> Download Completed Form 1040</h4>
+            <a href="{{ url_for('download_pdf', filename=pdf_filename) }}" class="btn btn-outline">
+                <i class="bi bi-file-earmark-arrow-down"></i> Download Form 1040 PDF
+            </a>
+        </div>
+    </div>
 </body>
 </html>

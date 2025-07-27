@@ -1,22 +1,25 @@
 # AI Tax Return Agent Prototype
 
-This project is a working prototype of an AI-powered tax return assistant. It allows users to upload W-2, 1099-INT, and 1099-NEC forms, extracts the necessary tax information, calculates tax liability based on 2024 IRS rules, and generates a filled IRS Form 1040.
+A simplified AI-based system for preparing individual tax returns by:
+- Uploading tax forms (W-2, 1099-NEC, 1099-INT)
+- Extracting data using PDF parsing
+- Calculating tax due or refund using IRS 2024 brackets
+- Generating a downloadable Form 1040 PDF
 
 ## Features
+- File upload interface (W-2/1099s)
+- Auto-parsing of wages and withholding
+- Refund calculation with standard deductions
+- PDF generation of simplified Form 1040
 
-- PDF Upload (W-2, 1099-NEC, 1099-INT)
-- OCR-based Tax Info Extraction
-- Tax Calculation Logic
-- PDF Generation of Form 1040
+## Tech Stack
+- Python, Flask
+- PDFPlumber (for parsing)
+- ReportLab (for PDF generation)
 
-## Getting Started
-
-1. Clone the repo and create a virtual environment.
-2. Install requirements: `pip install -r requirements.txt`
-3. Run: `python app.py`
-
-## Next Steps
-
-- UI Improvements
-- Support for more forms (Schedule C, 1098)
-- IRS Sandbox Integration
+## How to Run
+```bash
+git clone <your-repo>
+cd ai_tax_agent
+pip install -r requirements.txt
+python app.py
