@@ -28,7 +28,9 @@
     <div class="container py-5">
         <div class="card shadow p-4 mx-auto" style="max-width: 700px;">
             <h2 class="mb-4 text-center"><i class="bi bi-file-earmark-text"></i> Upload Your Tax Documents</h2>
-            <form method="POST" action="/upload" enctype="multipart/form-data">
+            
+            <!-- Updated: add ID, remove method/action -->
+            <form id="taxForm" enctype="multipart/form-data">
                 <div class="mb-3">
                     <label class="form-label">Full Name</label>
                     <input type="text" name="name" class="form-control" placeholder="e.g. John Doe" required>
@@ -47,14 +49,95 @@
                     <input type="number" name="dependents" class="form-control" min="0" required>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Upload Tax PDFs (W-2, 1099-NEC, 1099-INT)</label>
-                    <input type="file" name="files" class="form-control" accept=".pdf" multiple required>
+                    <label for="files" class="form-label">Upload Tax PDFs (W-2, 1099-NEC, 1099-INT)</label>
+                    <input type="file" class="form-control" id="files" name="files[]" multiple onchange="updateFileList()">
                 </div>
+
+                <!-- File list preview -->
+                <div class="mb-3">
+                    <ul class="list-group" id="fileListPreview"></ul>
+                </div>
+
                 <button type="submit" class="btn btn-primary w-100">
                     <i class="bi bi-upload"></i> Upload and Process
                 </button>
             </form>
         </div>
     </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        let selectedFiles = [];
+
+        function updateFileList() {
+            const input = document.getElementById("files");
+            const fileList = input.files;
+
+            for (let file of fileList) {
+                if (!selectedFiles.some(f => f.name === file.name && f.size === file.size)) {
+                    selectedFiles.push(file);
+                }
+            }
+
+            renderFileList();
+            refreshInputFiles();
+        }
+
+        function removeFile(index) {
+            selectedFiles.splice(index, 1);
+            renderFileList();
+            refreshInputFiles();
+        }
+
+        function renderFileList() {
+            const preview = document.getElementById("fileListPreview");
+            preview.innerHTML = "";
+
+            selectedFiles.forEach((file, index) => {
+                const item = document.createElement("li");
+                item.className = "list-group-item d-flex justify-content-between align-items-center";
+                item.innerHTML = `
+                    ${file.name} (${(file.size / 1024).toFixed(1)} KB)
+                    <button type="button" class="btn btn-sm btn-danger" onclick="removeFile(${index})">Remove</button>
+                `;
+                preview.appendChild(item);
+            });
+        }
+
+        function refreshInputFiles() {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            document.getElementById("files").files = dataTransfer.files;
+        }
+
+        // Custom form submission to handle dynamic file list
+        document.getElementById("taxForm").addEventListener("submit", function(event) {
+            event.preventDefault(); // prevent default submission
+
+            const formData = new FormData();
+            formData.append("name", document.querySelector('[name="name"]').value);
+            formData.append("filing_status", document.querySelector('[name="filing_status"]').value);
+            formData.append("dependents", document.querySelector('[name="dependents"]').value);
+
+            selectedFiles.forEach(file => {
+                formData.append("files[]", file);
+            });
+
+            fetch("/upload", {
+                method: "POST",
+                body: formData
+            })
+            .then(response => response.text())
+            .then(html => {
+                document.open();
+                document.write(html);
+                document.close();
+            })
+            .catch(error => {
+                console.error("Upload failed:", error);
+                alert("Something went wrong while uploading.");
+            });
+        });
+    </script>
 </body>
 </html>

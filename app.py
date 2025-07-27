@@ -24,10 +24,18 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    if 'files' not in request.files:
+    print("=== DEBUG INFO ===")
+    print("Form Keys:", list(request.form.keys()))
+    print("File Keys:", list(request.files.keys()))
+    print("Files Received:", request.files.getlist('files'))
+    print("Files[] Received:", request.files.getlist('files[]'))
+    print("==================")
+
+    if 'files' not in request.files and 'files[]' not in request.files:
         return "No files uploaded", 400
 
-    uploaded_files = request.files.getlist('files')
+    uploaded_files = request.files.getlist('files') or request.files.getlist('files[]')
+
     personal_info = {
         'name': request.form.get('name'),
         'filing_status': request.form.get('filing_status'),
@@ -58,6 +66,10 @@ def upload_file():
         if parsed.get('type') == 'W-2':
             total_income += float(parsed.get('wages', 0))
             total_withheld += float(parsed.get('withheld', 0))
+        elif parsed.get('type') == '1099-NEC':
+            total_income += float(parsed.get('nonemployee_comp', 0))
+        elif parsed.get('type') == '1099-INT':
+            total_income += float(parsed.get('interest_income', 0))
 
     filing_status = personal_info['filing_status']
     tax_due, deduction_used, taxable_income = calculate_tax(total_income, filing_status)
