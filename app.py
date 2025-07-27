@@ -24,12 +24,12 @@ def index():
 
 @app.route('/upload', methods=['POST'])
 def upload_file():
-    print("=== DEBUG INFO ===")
-    print("Form Keys:", list(request.form.keys()))
-    print("File Keys:", list(request.files.keys()))
-    print("Files Received:", request.files.getlist('files'))
-    print("Files[] Received:", request.files.getlist('files[]'))
-    print("==================")
+    # print("=== DEBUG INFO ===")
+    # print("Form Keys:", list(request.form.keys()))
+    # print("File Keys:", list(request.files.keys()))
+    # print("Files Received:", request.files.getlist('files'))
+    # print("Files[] Received:", request.files.getlist('files[]'))
+    # print("==================")
 
     if 'files' not in request.files and 'files[]' not in request.files:
         return "No files uploaded", 400
@@ -37,10 +37,19 @@ def upload_file():
     uploaded_files = request.files.getlist('files') or request.files.getlist('files[]')
 
     personal_info = {
-        'name': request.form.get('name'),
-        'filing_status': request.form.get('filing_status'),
-        'dependents': request.form.get('dependents')
-    }
+    'name': request.form.get('name'),
+    'ssn': request.form.get('ssn'),
+    'dob': request.form.get('dob'),
+    'address': request.form.get('address'),
+    'city': request.form.get('city'),
+    'state': request.form.get('state'),
+    'zip': request.form.get('zip'),
+    'phone': request.form.get('phone'),
+    'email': request.form.get('email'),
+    'filing_status': request.form.get('filing_status'),
+    'dependents': request.form.get('dependents')
+}
+
 
     saved_files = []
     for file in uploaded_files:

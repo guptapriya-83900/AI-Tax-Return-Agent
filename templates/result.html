@@ -34,10 +34,18 @@
 <body>
     <div class="container py-5">
         <div class="section">
-            <h2 class="mb-3"><i class="bi bi-person-badge"></i> Personal Info</h2>
-            <p><strong>Name:</strong> {{ info.name }}</p>
-            <p><strong>Filing Status:</strong> {{ info.filing_status }}</p>
-            <p><strong>Dependents:</strong> {{ info.dependents }}</p>
+            <h5 class="mb-3">Personal Information:</h5>
+            <ul class="list-group mb-4">
+                <li class="list-group-item"><strong>Name:</strong> {{ info.name }}</li>
+                <li class="list-group-item"><strong>SSN:</strong> {{ info.ssn }}</li>
+                <li class="list-group-item"><strong>Date of Birth:</strong> {{ info.dob }}</li>
+                <li class="list-group-item"><strong>Address:</strong> {{ info.address }}, {{ info.city }}, {{ info.state }} {{ info.zip }}</li>
+                <li class="list-group-item"><strong>Phone:</strong> {{ info.phone }}</li>
+                <li class="list-group-item"><strong>Email:</strong> {{ info.email }}</li>
+                <li class="list-group-item"><strong>Filing Status:</strong> {{ info.filing_status }}</li>
+                <li class="list-group-item"><strong>Dependents:</strong> {{ info.dependents }}</li>
+            </ul>
+
         </div>
 
         <div class="section">
