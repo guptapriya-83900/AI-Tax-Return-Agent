@@ -2,6 +2,7 @@ from flask import Flask, render_template, request, redirect, url_for, send_from_
 import os
 from werkzeug.utils import secure_filename
 from modules.extractor import extract_data_from_pdf
+from modules.tax_logic import calculate_tax
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -45,15 +46,43 @@ def upload_file():
         parsed['filename'] = filename
         parsed_results.append(parsed)
           # 👇 DEBUG: See what text was extracted
-        print("======== RAW TEXT FROM FILE ========")
-        print(f"File: {filename}")
-        print(parsed.get('raw_text', 'No text found'))
+        # print("======== RAW TEXT FROM FILE ========")
+        # print(f"File: {filename}")
+        # print(parsed.get('raw_text', 'No text found'))
+
+    total_income = 0
+    total_withheld = 0
+
+    for parsed in parsed_results:
+        if parsed.get('type') == 'W-2':
+            total_income += float(parsed.get('wages', 0))
+            total_withheld += float(parsed.get('withheld', 0))
+
+    # Use user input for filing status
+    filing_status = personal_info['filing_status']
+    tax_due, deduction_used, taxable_income = calculate_tax(total_income, filing_status)
+
+    refund_or_owe = round(total_withheld - tax_due, 2)
+    tax_summary = {
+        'total_income': total_income,
+        'standard_deduction': deduction_used,
+        'taxable_income': taxable_income,
+        'tax_due': tax_due,
+        'withheld': total_withheld,
+        'refund_or_owe': refund_or_owe
+    }
+
+    # Add this in render_template:
+    return render_template('result.html',
+                        files=saved_files,
+                        info=personal_info,
+                        parsed_data=parsed_results,
+                        tax_summary=tax_summary)
 
 
 # Pass to template
-    return render_template('result.html', files=saved_files, info=personal_info, parsed_data=parsed_results)
-
-    #return render_template('result.html', files=saved_files, info=personal_info)
+    # Step 2: return render_template('result.html', files=saved_files, info=personal_info, parsed_data=parsed_results)
+    #Step 1: return render_template('result.html', files=saved_files, info=personal_info)
 
 # Optional route to view uploaded file (for testing)
 @app.route('/uploads/<filename>')
