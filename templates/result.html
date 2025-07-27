@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Upload Result</title>
+</head>
+<body class="container py-5">
+    <h2>Uploaded Files</h2>
+    <ul>
+        {% for file in files %}
+            <li><a href="{{ url_for('uploaded_file', filename=file) }}">{{ file }}</a></li>
+        {% endfor %}
+    </ul>
+
+    <h3>Personal Info:</h3>
+    <p>Name: {{ info.name }}</p>
+    <p>Filing Status: {{ info.filing_status }}</p>
+    <p>Dependents: {{ info.dependents }}</p>
+</body>
+</html>
