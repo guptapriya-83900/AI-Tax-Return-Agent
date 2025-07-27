@@ -38,6 +38,10 @@
         <li><strong>Refund or Amount Owed:</strong> ${{ tax_summary.refund_or_owe }}</li>
     </ul>
 
+    <h3>Download Completed Form 1040:</h3>
+    <a href="{{ url_for('download_pdf', filename=pdf_filename) }}" class="btn btn-success">Download Form 1040 PDF</a>
+
+
 
 </body>
 </html>

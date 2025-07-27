@@ -3,12 +3,15 @@ import os
 from werkzeug.utils import secure_filename
 from modules.extractor import extract_data_from_pdf
 from modules.tax_logic import calculate_tax
+from modules.form_filler import generate_1040_pdf
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 2 * 1024 * 1024  # 2 MB limit
+
 
 # Utility function to check file type
 def allowed_file(filename):
@@ -38,6 +41,8 @@ def upload_file():
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
             saved_files.append(filename)
+        else:
+            return "Only PDF files allowed", 400
 
     parsed_results = []
     for filename in saved_files:
@@ -72,12 +77,28 @@ def upload_file():
         'refund_or_owe': refund_or_owe
     }
 
+    output_pdf_path = os.path.join("output", "Form_1040.pdf")
+    generate_1040_pdf(
+        output_path=output_pdf_path,
+        name=personal_info["name"],
+        filing_status=filing_status,
+        summary=tax_summary
+    )
+
+
     # Add this in render_template:
     return render_template('result.html',
-                        files=saved_files,
-                        info=personal_info,
-                        parsed_data=parsed_results,
-                        tax_summary=tax_summary)
+                       files=saved_files,
+                       info=personal_info,
+                       parsed_data=parsed_results,
+                       tax_summary=tax_summary,
+                       pdf_filename="Form_1040.pdf")
+
+    # Step 3: return render_template('result.html',
+    #                     files=saved_files,
+    #                     info=personal_info,
+    #                     parsed_data=parsed_results,
+    #                     tax_summary=tax_summary)
 
 
 # Pass to template
@@ -88,6 +109,11 @@ def upload_file():
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/output/<filename>')
+def download_pdf(filename):
+    return send_from_directory('output', filename, as_attachment=True)
+
 
 if __name__ == '__main__':
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
