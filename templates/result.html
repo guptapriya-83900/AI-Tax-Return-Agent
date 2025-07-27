@@ -87,6 +87,11 @@
             <h4 class="mb-3"><i class="bi bi-download"></i> Download Completed Form 1040</h4>
             <form action="/download_pdf" method="POST">
                 <input type="hidden" name="name" value="{{ info.name }}">
+                <input type="hidden" name="ssn" value="{{ info.ssn }}">
+                <input type="hidden" name="address" value="{{ info.address }}">
+                <input type="hidden" name="city" value="{{ info.city }}">
+                <input type="hidden" name="state" value="{{ info.state }}">
+                <input type="hidden" name="zip" value="{{ info.zip }}">
                 <input type="hidden" name="filing_status" value="{{ info.filing_status }}">
                 <input type="hidden" name="total_income" value="{{ tax_summary.total_income }}">
                 <input type="hidden" name="standard_deduction" value="{{ tax_summary.standard_deduction }}">

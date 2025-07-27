@@ -120,6 +120,8 @@ def uploaded_file(filename):
 def download_generated_pdf():
     name = request.form.get("name")
     filing_status = request.form.get("filing_status")
+    ssn = request.form.get("ssn")
+    address = f"{request.form.get('address')}, {request.form.get('city')}, {request.form.get('state')} {request.form.get('zip')}"
 
     summary = {
         "total_income": float(request.form.get("total_income")),
@@ -130,7 +132,7 @@ def download_generated_pdf():
         "refund_or_owe": float(request.form.get("refund_or_owe"))
     }
 
-    pdf_buffer = generate_1040_pdf_bytes(name, filing_status, summary)
+    pdf_buffer = generate_1040_pdf_bytes(name, filing_status, summary, ssn=ssn, address=address)
     return send_file(pdf_buffer, mimetype="application/pdf", download_name="Form_1040.pdf", as_attachment=True)
 
 
