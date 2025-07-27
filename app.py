@@ -3,7 +3,8 @@ import os
 from werkzeug.utils import secure_filename
 from modules.extractor import extract_data_from_pdf
 from modules.tax_logic import calculate_tax
-from modules.form_filler import generate_1040_pdf
+from flask import send_file
+from modules.form_filler import generate_1040_pdf_bytes
 
 UPLOAD_FOLDER = 'uploads'
 ALLOWED_EXTENSIONS = {'pdf'}
@@ -34,7 +35,6 @@ def upload_file():
     }
 
     saved_files = []
-
     for file in uploaded_files:
         if file and allowed_file(file.filename):
             filename = secure_filename(file.filename)
@@ -50,10 +50,6 @@ def upload_file():
         parsed = extract_data_from_pdf(filepath)
         parsed['filename'] = filename
         parsed_results.append(parsed)
-          # 👇 DEBUG: See what text was extracted
-        # print("======== RAW TEXT FROM FILE ========")
-        # print(f"File: {filename}")
-        # print(parsed.get('raw_text', 'No text found'))
 
     total_income = 0
     total_withheld = 0
@@ -63,7 +59,6 @@ def upload_file():
             total_income += float(parsed.get('wages', 0))
             total_withheld += float(parsed.get('withheld', 0))
 
-    # Use user input for filing status
     filing_status = personal_info['filing_status']
     tax_due, deduction_used, taxable_income = calculate_tax(total_income, filing_status)
 
@@ -77,22 +72,12 @@ def upload_file():
         'refund_or_owe': refund_or_owe
     }
 
-    output_pdf_path = os.path.join("output", "Form_1040.pdf")
-    generate_1040_pdf(
-        output_path=output_pdf_path,
-        name=personal_info["name"],
-        filing_status=filing_status,
-        summary=tax_summary
-    )
-
-
-    # Add this in render_template:
     return render_template('result.html',
-                       files=saved_files,
-                       info=personal_info,
-                       parsed_data=parsed_results,
-                       tax_summary=tax_summary,
-                       pdf_filename="Form_1040.pdf")
+                           files=saved_files,
+                           info=personal_info,
+                           parsed_data=parsed_results,
+                           tax_summary=tax_summary)
+
 
     # Step 3: return render_template('result.html',
     #                     files=saved_files,
@@ -110,9 +95,23 @@ def upload_file():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/output/<filename>')
-def download_pdf(filename):
-    return send_from_directory('output', filename, as_attachment=True)
+@app.route("/download_pdf", methods=["POST"])
+def download_generated_pdf():
+    name = request.form.get("name")
+    filing_status = request.form.get("filing_status")
+
+    summary = {
+        "total_income": float(request.form.get("total_income")),
+        "standard_deduction": float(request.form.get("standard_deduction")),
+        "taxable_income": float(request.form.get("taxable_income")),
+        "tax_due": float(request.form.get("tax_due")),
+        "withheld": float(request.form.get("withheld")),
+        "refund_or_owe": float(request.form.get("refund_or_owe"))
+    }
+
+    pdf_buffer = generate_1040_pdf_bytes(name, filing_status, summary)
+    return send_file(pdf_buffer, mimetype="application/pdf", download_name="Form_1040.pdf", as_attachment=True)
+
 
 
 if __name__ == '__main__':

@@ -77,10 +77,21 @@
 
         <div class="section text-center">
             <h4 class="mb-3"><i class="bi bi-download"></i> Download Completed Form 1040</h4>
-            <a href="{{ url_for('download_pdf', filename=pdf_filename) }}" class="btn btn-outline">
-                <i class="bi bi-file-earmark-arrow-down"></i> Download Form 1040 PDF
-            </a>
+            <form action="/download_pdf" method="POST">
+                <input type="hidden" name="name" value="{{ info.name }}">
+                <input type="hidden" name="filing_status" value="{{ info.filing_status }}">
+                <input type="hidden" name="total_income" value="{{ tax_summary.total_income }}">
+                <input type="hidden" name="standard_deduction" value="{{ tax_summary.standard_deduction }}">
+                <input type="hidden" name="taxable_income" value="{{ tax_summary.taxable_income }}">
+                <input type="hidden" name="tax_due" value="{{ tax_summary.tax_due }}">
+                <input type="hidden" name="withheld" value="{{ tax_summary.withheld }}">
+                <input type="hidden" name="refund_or_owe" value="{{ tax_summary.refund_or_owe }}">
+                <button type="submit" class="btn btn-outline">
+                    <i class="bi bi-file-earmark-arrow-down"></i> Download Form 1040 PDF
+                </button>
+            </form>
         </div>
+        
     </div>
 </body>
 </html>
